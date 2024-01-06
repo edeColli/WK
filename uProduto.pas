@@ -32,7 +32,7 @@ type
 implementation
 
 uses
-  Vcl.Dialogs;
+  Vcl.Dialogs, WKResourceString;
 
 { TProduto }
 
@@ -54,7 +54,7 @@ begin
   Result := True;
   if Self = nil then
   begin
-    ShowMessage('Produto não encontrado.');
+    ShowMessage(RsProdutoNaoEncontrado);
     Result := False;
   end;
 end;

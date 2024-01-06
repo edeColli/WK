@@ -10,9 +10,7 @@ object frmPedidoVenda: TfrmPedidoVenda
   Font.Height = -12
   Font.Name = 'Segoe UI'
   Font.Style = []
-  OldCreateOrder = True
   OnCreate = FormCreate
-  PixelsPerInch = 96
   TextHeight = 15
   object EdtCodigoCliente: TLabeledEdit
     Left = 5
@@ -23,6 +21,7 @@ object frmPedidoVenda: TfrmPedidoVenda
     EditLabel.Height = 15
     EditLabel.Caption = 'Cliente'
     TabOrder = 0
+    Text = ''
   end
   object EdtNomeCliente: TLabeledEdit
     Left = 88
@@ -33,6 +32,7 @@ object frmPedidoVenda: TfrmPedidoVenda
     EditLabel.Height = 15
     EditLabel.Caption = 'Nome'
     TabOrder = 8
+    Text = ''
   end
   object EdtCodigoItem: TLabeledEdit
     Left = 5
@@ -43,6 +43,7 @@ object frmPedidoVenda: TfrmPedidoVenda
     EditLabel.Height = 15
     EditLabel.Caption = 'Produto'
     TabOrder = 2
+    Text = ''
   end
   object EdtDescricaoItem: TLabeledEdit
     Left = 88
@@ -53,6 +54,7 @@ object frmPedidoVenda: TfrmPedidoVenda
     EditLabel.Height = 15
     EditLabel.Caption = 'Descri'#231#227'o'
     TabOrder = 9
+    Text = ''
   end
   object EdtQuantidade: TLabeledEdit
     Left = 280
@@ -63,6 +65,7 @@ object frmPedidoVenda: TfrmPedidoVenda
     EditLabel.Height = 15
     EditLabel.Caption = 'Quantidade'
     TabOrder = 4
+    Text = ''
   end
   object BtnSalvar: TButton
     Left = 457
@@ -81,6 +84,7 @@ object frmPedidoVenda: TfrmPedidoVenda
     EditLabel.Height = 15
     EditLabel.Caption = 'Valor Unit'#225'rio'
     TabOrder = 5
+    Text = ''
   end
   object BtnLocalizarCliente: TButton
     Left = 63
@@ -121,6 +125,7 @@ object frmPedidoVenda: TfrmPedidoVenda
     EditLabel.Height = 15
     EditLabel.Caption = 'Vl. Total Pedido'
     TabOrder = 10
+    Text = ''
   end
   object dbGridProdutos: TDBGrid
     Left = 5
@@ -150,6 +155,14 @@ object frmPedidoVenda: TfrmPedidoVenda
     Height = 25
     Caption = 'Carregar Pedido'
     TabOrder = 13
+  end
+  object btnLimparTela: TButton
+    Left = 440
+    Top = 8
+    Width = 113
+    Height = 25
+    Caption = 'Limpar Tela'
+    TabOrder = 14
   end
   object dsProdutos: TDataSource
     Left = 472

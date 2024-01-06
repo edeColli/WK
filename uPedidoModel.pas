@@ -51,6 +51,7 @@ var
 begin
   Query := TFDQuery.Create(nil);
   try
+    Query.Connection := Conexao;
     Query.SQL.Text := 'DELETE FROM pedido WHERE numero_pedido = :numero_pedido ';
     Query.ParamByName('numero_pedido').AsInteger := NumeroPedido;
     Query.ExecSQL;

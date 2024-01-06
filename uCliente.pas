@@ -21,7 +21,7 @@ type
 implementation
 
 uses
-  Vcl.Dialogs;
+  Vcl.Dialogs, WKResourceString;
 
 { TCliente }
 
@@ -30,7 +30,7 @@ begin
   Result := True;
   if Self = nil then
   begin
-    ShowMessage('Cliente não encontrado.');
+    ShowMessage(RSClienteNaoEncontrado);
     Result := False;
   end;
 end;

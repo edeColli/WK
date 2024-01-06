@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, uCliente,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.Mask, Vcl.ExtCtrls, Vcl.Grids, uConnection, uProduto,
-  uClienteController, uProdutoController, Data.DB, Vcl.DBGrids, DBClient, System.Generics.Collections,
+  uClienteController, uProdutoController, Data.DB, Vcl.DBGrids, DBClient, System.Generics.Collections, WKResourceString,
   FireDAC.Comp.Client, System.UITypes;
 
 type
@@ -25,6 +25,7 @@ type
     dsProdutos: TDataSource;
     btnCancelarPedido: TButton;
     BtnCarregarPedido: TButton;
+    btnLimparTela: TButton;
     procedure FormCreate(Sender: TObject);
   private
     connectionModule:  TConnectionModule;
@@ -38,6 +39,7 @@ type
     procedure DoOnClickGerarPedido(Sender: TObject);
     procedure DoOnClickCancelarPedido(Sender: TObject);
     procedure DoOnClickCarregarPedido(Sender: TObject);
+    procedure DoOnClickLimparTela(Sender: TObject);
     procedure DoOnKeyPressEdit(Sender: TObject; var Key: Char);
     procedure DoOnKeyPressEditValue(Sender: TObject; var Key: Char);
     procedure DoonKeyPressGrid(Sender: TObject; var Key: Char);
@@ -80,9 +82,6 @@ type
 
 var
   frmPedidoVenda: TfrmPedidoVenda;
-
-CONST
-  MSG_INVALIDA = 'Código inválido. Informe um código válido.';
 
 implementation
 
@@ -128,6 +127,8 @@ begin
   CDSProdutos.FieldByName('Quantidade').AsInteger := StrToIntDef(edtQuantidade.Text, 0);
   CDSProdutos.FieldByName('Valor_Unitario').AsFloat := StrToCurrDef(edtValorUnitario.Text, 0);
   CDSProdutos.Post;
+
+  edtValorTotalPedido.Text := CurrToStr(getTotalPedido);
 end;
 
 procedure TfrmPedidoVenda.ConfigurarGridSelecaoLinha;
@@ -164,7 +165,7 @@ begin
       TPedidoController.CancelarPedido(NumeroPedido, connectionModule.Connection);
       Transaction.Commit;
 
-      ShowMessage('Pedido cancelado com sucesso.');
+      ShowMessage(RSPedidoCancelado);
       LimparTela;
     except
       Transaction.Rollback
@@ -183,6 +184,11 @@ begin
   begin
     AQuery := TPedidoController.CarregarPedido(NumeroPedido, connectionModule.Connection);
     try
+      if AQuery.IsEmpty then
+      begin
+        ShowMessage(RSPedidoNaoEncontrado);
+        exit;
+      end;
       PopularDadosPedido(AQuery);
       FCliente := TClienteController.getClienteByNumeroPedido(NumeroPedido, ConnectionModule.Connection);
     finally
@@ -220,6 +226,7 @@ begin
   BtnGerarPedido.OnClick := DoOnClickGerarPedido;
   btnCancelarPedido.OnClick := DoOnClickCancelarPedido;
   BtnCarregarPedido.OnClick := DoOnClickCarregarPedido;
+  btnLimparTela.OnClick := DoOnClickLimparTela;
   habilitarBotoesPedido;
 end;
 
@@ -273,6 +280,11 @@ begin
   gerarPedido;
 end;
 
+procedure TfrmPedidoVenda.DoOnClickLimparTela(Sender: TObject);
+begin
+  LimparTela;
+end;
+
 procedure TfrmPedidoVenda.DoOnClickSearchCliente(Sender: TObject);
 begin
   getCliente;
@@ -297,11 +309,11 @@ begin
       NumeroPedido := CDSProdutos.FieldByName('Numero_pedido').AsInteger;
       Id := CDSProdutos.FieldByName('ID').AsInteger;
 
-      if MessageDlg('Deseja excluir o item do pedido?', mtConfirmation, [mbYes, mbNo], 0) = mrYes then
+      if MessageDlg(RsDesejaExcluir, mtConfirmation, [mbYes, mbNo], 0) = mrYes then
       begin
         if not TItemPedidoController.ExcluirItemPedido(NumeroPedido, Id, connectionModule.Connection) then
         begin
-          ShowMessage('Erro ao excluir o item do pedido.');
+          ShowMessage(RsErroExcluirItem);
           Exit;
         end;
         CDSProdutos.Delete;
@@ -364,7 +376,7 @@ var
 
   procedure TratarErroGravacao;
   begin
-    ShowMessage('Erro ao gravar item do pedido no banco.');
+    ShowMessage(RsErroGravarItemPedido);
     Exit;
   end;
 begin
@@ -384,7 +396,7 @@ begin
 
         if not TPedidoController.GravarPedido(NumeroPedido, Pedido, connectionModule.Connection) then
         begin
-          ShowMessage('Erro ao gravar pedido no banco.');
+          ShowMessage(RsErroGravarPedido);
           Exit;
         end;
         if True then
@@ -422,7 +434,7 @@ begin
       finally
         Pedido.Free;
       end;
-      ShowMessage('Pedido gravado com sucesso.');
+      ShowMessage(Format(RsPedidoGravado,[NumeroPedido.ToString]));
       LimparTela;
     except
       Transaction.Rollback
@@ -430,7 +442,7 @@ begin
     Transaction.Free;
   end
   else
-    ShowMessage('Impossível gerar o pedido, informações inválidas. Verique!');
+    ShowMessage(RsInformacoesInvalidas);
 end;
 
 procedure TfrmPedidoVenda.getCliente;
@@ -439,7 +451,7 @@ var
 begin
   if (Trim(EdtCodigoCliente.Text) = '') or (StrToIntDef(EdtCodigoCliente.Text, 0) = 0) then
   begin
-    ShowMessage(MSG_INVALIDA);
+    ShowMessage(RSCodigoInvalido);
     Exit;
   end;
 
@@ -460,7 +472,7 @@ var
 begin
   if (Trim(EdtCodigoItem.Text) = '') or (StrToIntDef(EdtCodigoItem.Text, 0) = 0) then
   begin
-    ShowMessage(MSG_INVALIDA);
+    ShowMessage(RSCodigoInvalido);
     Exit;
   end;
 
@@ -567,19 +579,19 @@ end;
 
 procedure TfrmPedidoVenda.ProdutoInvalido;
 begin
-  ShowMessage('Produto sem preço ou com quantidade zerada. Verifique!');
+  ShowMessage(RsProdutoSemPreco);
 end;
 
 function TfrmPedidoVenda.InputNumeroPedido: Integer;
 var
   NumeroPedidoStr: string;
 begin
-  NumeroPedidoStr := InputBox('Carregar Pedido', 'Digite o número do pedido:', '');
+  NumeroPedidoStr := InputBox(RsCarregarPedido, RsInformePedido, '');
 
   if not TryStrToInt(NumeroPedidoStr, Result) then
   begin
     Result := 0;
-    ShowMessage('Número de pedido inválido.');
+    ShowMessage(RsPedidoInvalido);
   end;
 end;
 
